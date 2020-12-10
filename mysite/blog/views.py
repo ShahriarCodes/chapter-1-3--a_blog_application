@@ -3,9 +3,29 @@ from .models import Post
 from django.core.paginator import Paginator, EmptyPage,\
 PageNotAnInteger
 from django.views.generic import ListView
-
+from .forms import EmailPostForm
 
 # Create your views here.
+def post_share(request, post_id):
+    # Retrieve post by id
+    post = get_object_or_404(Post, id=post_id,
+                            status='published')
+
+    if request.method == 'POST':
+        # Form was submitted
+        form = EmailPostForm(request.POST)
+        if form.is_valid():
+            # Form fields passed valivation
+            cd = form.cleaned_data
+        else:
+            form = EmailPostForm()
+
+        context = {'posts': posts,
+                'page': page,}
+        return render(request, 'blog/post/share.html',
+                                context=context)
+
+
 class PostListView(ListView):
     queryset = Post.published.all()
     context_object_name = 'posts'
@@ -40,6 +60,6 @@ def post_detail(request, year, month, day, post):
                                    publish__month=month,
                                    publish__day=day)
 
-    context = {'posts': posts}
+    context = {'post': post}
     return render(request,
                   'blog/post/detail.html', context=context)
